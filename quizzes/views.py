@@ -91,7 +91,7 @@ def list_quizzes_view(request):
     paginator.page_size = 10
     page_data= paginator.paginate_queryset(quizzes, request)
 
-    serializer = QuizListSerializer(page, many=True)
+    serializer = QuizListSerializer(page_data, many=True)
     response_data = {
         'error': False,
         'data': serializer.data
