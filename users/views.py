@@ -26,7 +26,6 @@ from common.services.auth_service import register_user, login_user, change_passw
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def register_view(request):
-
     serializer = RegisterSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(

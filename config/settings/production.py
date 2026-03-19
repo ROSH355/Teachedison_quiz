@@ -1,8 +1,3 @@
-"""
-Production settings for Railway deployment.
-All secrets come from environment variables — never hardcoded.
-"""
-
 from .base import *
 import os
 import dj_database_url
@@ -59,31 +54,5 @@ LOGGING = {
         },
     },
 }
-```
 
----
 
-## Part 4 — Deployment Files
-
-### Update `requirements.txt`
-```
-django>=4.2,<5.0
-djangorestframework>=3.14
-psycopg2-binary>=2.9
-python-dotenv>=1.0
-djangorestframework-simplejwt>=5.3
-drf-yasg>=1.21
-django-cors-headers>=4.3
-django-filter>=23.0
-gunicorn>=21.0
-whitenoise>=6.6
-dj-database-url>=2.1
-requests>=2.31
-Pillow>=10.0
-```
-
----
-
-### Update `Procfile`
-```
-web: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120
