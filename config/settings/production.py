@@ -23,6 +23,9 @@ CSRF_COOKIE_SECURE = True
 SECURE_HSTS_SECONDS = 3600
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://web-production-3114f.up.railway.app',
+]
 # Static files served by WhiteNoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
