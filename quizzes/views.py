@@ -1,10 +1,4 @@
-"""
-Quiz views — thin layer that delegates to quiz_service.
-
-Pattern used: function-based views with @api_view decorator.
-Clean, readable, interview-friendly.
-"""
-
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 import logging
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -29,8 +23,11 @@ from common.utils.permissions import IsAdminRole
 logger = logging.getLogger(__name__)
 
 
+from common.utils.throttles import QuizCreateThrottle
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsAdminRole])
+@throttle_classes([QuizCreateThrottle])
 def create_quiz_view(request):
     """
     POST /api/quizzes/
@@ -63,6 +60,8 @@ def create_quiz_view(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+from django.core.cache import cache
+from django.conf import settings
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -72,11 +71,15 @@ def list_quizzes_view(request):
     Public — lists all published quizzes with pagination.
     Supports ?topic=python and ?difficulty=easy filters.
     """
+    topic = request.query_params.get('topic', '')
+    difficulty = request.query_params.get('difficulty', '')
+    page = request.query_params.get('page', '1')
+    cache_key = f'quiz_list_{topic}_{difficulty}_{page}
+    
+    cached = cache.get(cache_key)
+    if cached:
+        return Response(cached)
     quizzes = get_published_quizzes()
-
-    # Simple filtering
-    topic = request.query_params.get('topic')
-    difficulty = request.query_params.get('difficulty')
 
     if topic:
         quizzes = quizzes.filter(topic__icontains=topic)
@@ -86,13 +89,18 @@ def list_quizzes_view(request):
     # Pagination
     paginator = PageNumberPagination()
     paginator.page_size = 10
-    page = paginator.paginate_queryset(quizzes, request)
+    page_data= paginator.paginate_queryset(quizzes, request)
 
     serializer = QuizListSerializer(page, many=True)
-    return paginator.get_paginated_response({
+    response_data = {
         'error': False,
         'data': serializer.data
-    })
+    }
+
+    # Store in cache
+    cache.set(cache_key, response_data, settings.CACHE_TTL['quiz_list'])
+
+    return paginator.get_paginated_response(response_data)
 
 
 @api_view(['GET'])

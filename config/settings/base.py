@@ -119,10 +119,25 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '20/minute',
-        'user': '100/minute',
+        'anon': '20/minute',      # unauthenticated users
+        'user': '100/minute',     # authenticated users
+        'quiz_create': '10/hour', # strict limit on AI generation
     },
     'EXCEPTION_HANDLER': 'common.utils.exceptions.custom_exception_handler',
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'quiz-api-cache',
+        'TIMEOUT': 300,  # 5 minutes default
+    }
+}
+
+CACHE_TTL = {
+    'quiz_list': 60 * 5,      # 5 minutes
+    'quiz_detail': 60 * 10,   # 10 minutes
+    'analytics': 60 * 2,      # 2 minutes
 }
 
 SIMPLE_JWT = {
