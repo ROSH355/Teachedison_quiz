@@ -74,7 +74,7 @@ def list_quizzes_view(request):
     topic = request.query_params.get('topic', '')
     difficulty = request.query_params.get('difficulty', '')
     page = request.query_params.get('page', '1')
-    cache_key = f'quiz_list_{topic}_{difficulty}_{page}
+    cache_key = f'quiz_list_{topic}_{difficulty}_{page}'
     
     cached = cache.get(cache_key)
     if cached:
@@ -138,7 +138,7 @@ def my_quizzes_view(request):
         'data': serializer.data
     })
 
-
+from .models import Quiz
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsAdminRole])
 def publish_quiz_view(request, quiz_id):
